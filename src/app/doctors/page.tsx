@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { ChatBubbleLeftIcon, UserPlusIcon } from '@heroicons/react/24/outline'
 import { useRouter } from 'next/navigation'
+import SearchDoctorModal from '@/components/SearchDoctorModal'
 
 interface Doctor {
   id: string
@@ -51,6 +52,7 @@ export default function DoctorsPage() {
   const router = useRouter()
   const [searchTerm, setSearchTerm] = useState('')
   const [doctors, setDoctors] = useState(initialDoctors)
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false)
 
   const filteredDoctors = doctors.filter(doctor =>
     doctor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -65,17 +67,30 @@ export default function DoctorsPage() {
     router.push(`/chat/doctor/${doctorId}`)
   }
 
+  const handleSearchDoctorRequest = (doctorId: string) => {
+    alert(`Friend request sent to doctor with ID: ${doctorId}`)
+    setIsSearchModalOpen(false)
+  }
+
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-semibold">Doctors</h2>
-        <input
-          type="search"
-          placeholder="Search doctors..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="px-4 py-2 border rounded-lg w-64 focus:outline-none focus:ring-2 focus:ring-primary"
-        />
+        <div className="flex space-x-4">
+          <input
+            type="search"
+            placeholder="Search doctors..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="px-4 py-2 border rounded-lg w-64 focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+          <button
+            onClick={() => setIsSearchModalOpen(true)}
+            className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90"
+          >
+            Add New Doctor
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -130,6 +145,12 @@ export default function DoctorsPage() {
           </div>
         ))}
       </div>
+
+      <SearchDoctorModal
+        isOpen={isSearchModalOpen}
+        onClose={() => setIsSearchModalOpen(false)}
+        onSendRequest={handleSearchDoctorRequest}
+      />
     </div>
   )
 }
