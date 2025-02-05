@@ -10,9 +10,18 @@ const config: Config = {
     extend: {
       colors: {
         primary: '#4A90E2',
+      },
+      transitionDuration: {
+        '300': '300ms',
+      },
+      lineClamp: {
+        2: '2',
+        3: '3',
       }
     },
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/line-clamp'),
+  ],
 }
 export default config

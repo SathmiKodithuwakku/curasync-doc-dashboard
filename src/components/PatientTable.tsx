@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { ChatBubbleLeftIcon, MagnifyingGlassIcon, ClockIcon, ArrowPathRoundedSquareIcon } from '@heroicons/react/24/outline'
-import { Patient } from '@/types'
+import { Patient, ChatPermissionLog } from '@/types'
 import SearchPatientModal from './SearchPatientModal'
 import TransferPatientModal from './TransferPatientModal'
 
@@ -18,7 +18,8 @@ const patients: Patient[] = [
     timeOfVisit: '02:00pm',
     reason: 'Monthly checkup',
     priority: 'high',
-    assignedDoctor: 'dr-james'
+    assignedDoctor: 'dr-james',
+    chatEnabled: true
   },
   {
     id: '348745',
@@ -29,7 +30,8 @@ const patients: Patient[] = [
     timeOfVisit: '01:00 pm',
     reason: 'Consultation',
     priority: 'medium',
-    assignedDoctor: 'dr-james'
+    assignedDoctor: 'dr-james',
+    chatEnabled: false
   }
 ]
 
@@ -42,9 +44,16 @@ export default function PatientTable() {
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false)
   const [isTransferModalOpen, setIsTransferModalOpen] = useState(false)
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null)
+  const [patientsList, setPatientsList] = useState<Patient[]>(patients)
+  const [chatLogs, setChatLogs] = useState<ChatPermissionLog[]>([])
 
   const handleChatClick = (patientId: string) => {
-    router.push(`/chat/${patientId}`)
+    const patient = patientsList.find(p => p.id === patientId)
+    if (patient?.chatEnabled) {
+      router.push(`/chat/${patientId}`)
+    } else {
+      alert('Chat is disabled for this patient')
+    }
   }
 
   const handleTimelineClick = (patientId: string) => {
@@ -68,7 +77,42 @@ export default function PatientTable() {
     setSelectedPatient(null)
   }
 
-  const sortedAndFilteredPatients = patients
+  const handleToggleChat = (patient: Patient) => {
+    const newStatus = !patient.chatEnabled
+    
+    // Show confirmation dialog
+    if (!confirm(`Are you sure you want to ${newStatus ? 'enable' : 'disable'} chat for ${patient.patientName}?`)) {
+      return
+    }
+
+    // Update patient chat status
+    setPatientsList(patients =>
+      patients.map(p =>
+        p.id === patient.id
+          ? { ...p, chatEnabled: newStatus }
+          : p
+      )
+    )
+
+    // Log the change
+    const log: ChatPermissionLog = {
+      id: Date.now().toString(),
+      patientId: patient.id,
+      patientName: patient.patientName,
+      enabled: newStatus,
+      timestamp: new Date().toISOString(),
+      changedBy: {
+        id: 'dr-james',
+        name: 'Dr. James Martin'
+      }
+    }
+    setChatLogs(prev => [log, ...prev])
+
+    // Show success message
+    alert(`Chat ${newStatus ? 'enabled' : 'disabled'} for ${patient.patientName}`)
+  }
+
+  const sortedAndFilteredPatients = patientsList
     .filter(patient => {
       const matchesSearch = 
         patient.patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -159,6 +203,7 @@ export default function PatientTable() {
               <th className="p-4 font-medium">Last Visit</th>
               <th className="p-4 font-medium">Time of Visit</th>
               <th className="p-4 font-medium">Reason</th>
+              <th className="p-4 font-medium">Chat Status</th>
               <th className="p-4 font-medium">Profile</th>
               <th className="p-4 font-medium">Actions</th>
             </tr>
@@ -191,6 +236,20 @@ export default function PatientTable() {
                 <td className="p-4 text-gray-600">{patient.timeOfVisit}</td>
                 <td className="p-4 text-gray-600">{patient.reason}</td>
                 <td className="p-4">
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      className="sr-only peer"
+                      checked={patient.chatEnabled}
+                      onChange={() => handleToggleChat(patient)}
+                    />
+                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                    <span className={`ml-3 text-sm font-medium ${patient.chatEnabled ? 'text-green-600' : 'text-red-600'}`}>
+                      {patient.chatEnabled ? 'Enabled' : 'Disabled'}
+                    </span>
+                  </label>
+                </td>
+                <td className="p-4">
                   <Link
                     href={`/patient/${patient.id}`}
                     className="inline-flex items-center px-3 py-1 text-sm text-primary border border-primary rounded-full hover:bg-primary/10"
@@ -201,9 +260,12 @@ export default function PatientTable() {
                 <td className="p-4">
                   <div className="flex items-center space-x-2">
                     <button 
-                      className="text-gray-600 hover:text-primary transition-colors"
+                      className={`text-gray-600 transition-colors ${
+                        patient.chatEnabled ? 'hover:text-primary' : 'opacity-50 cursor-not-allowed'
+                      }`}
                       onClick={() => handleChatClick(patient.id)}
-                      title="Chat with patient"
+                      title={patient.chatEnabled ? 'Chat with patient' : 'Chat is disabled'}
+                      disabled={!patient.chatEnabled}
                     >
                       <ChatBubbleLeftIcon className="h-6 w-6" />
                     </button>
