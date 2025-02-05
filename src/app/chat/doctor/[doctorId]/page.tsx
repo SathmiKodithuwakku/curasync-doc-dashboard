@@ -68,22 +68,24 @@ export default function DoctorChatPage({ params }: { params: { doctorId: string 
   }
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
+    <div className="flex flex-col h-screen">
       {/* Chat Header */}
-      <div className="bg-white border-b p-4 flex items-center space-x-4">
-        <img
-          src={`https://ui-avatars.com/api/?name=${doctor.name}`}
-          alt={doctor.name}
-          className="w-12 h-12 rounded-full"
-        />
-        <div>
-          <h2 className="font-semibold text-lg">{doctor.name}</h2>
-          <p className="text-gray-600 text-sm">{doctor.specialization}</p>
+      <div className="bg-[#B3E5FC] p-4">
+        <div className="flex items-center space-x-3">
+          <img
+            src={`https://ui-avatars.com/api/?name=${doctor.name}`}
+            alt={doctor.name}
+            className="w-10 h-10 rounded-full"
+          />
+          <div>
+            <h2 className="font-semibold text-gray-800">{doctor.name}</h2>
+            <p className="text-sm text-gray-600">{doctor.specialization}</p>
+          </div>
         </div>
       </div>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      {/* Chat Messages */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-[#F8FDFF]">
         {messages.map((message) => (
           <div
             key={message.id}
@@ -92,18 +94,18 @@ export default function DoctorChatPage({ params }: { params: { doctorId: string 
             <div
               className={`max-w-[70%] rounded-lg px-4 py-2 ${
                 message.sender === 'me'
-                  ? 'bg-primary text-white rounded-br-none'
-                  : 'bg-white text-gray-800 rounded-bl-none'
+                  ? 'bg-[#B3E5FC] text-gray-800 rounded-br-none'
+                  : 'bg-[#E3F2FD] text-gray-800 rounded-bl-none'
               }`}
             >
               <p>{message.text}</p>
               <div className="flex items-center justify-end space-x-1 mt-1">
-                <span className="text-xs opacity-75">{message.timestamp}</span>
+                <p className="text-xs text-gray-500">{message.timestamp}</p>
                 {message.sender === 'me' && (
-                  <span className="text-xs opacity-75">
+                  <span className="text-xs text-gray-500">
                     {message.status === 'sent' && '✓'}
                     {message.status === 'delivered' && '✓✓'}
-                    {message.status === 'read' && <span className="text-blue-200">✓✓</span>}
+                    {message.status === 'read' && <span className="text-blue-500">✓✓</span>}
                   </span>
                 )}
               </div>
@@ -112,19 +114,25 @@ export default function DoctorChatPage({ params }: { params: { doctorId: string 
         ))}
       </div>
 
-      {/* Message Input */}
-      <form onSubmit={handleSendMessage} className="bg-white border-t p-4">
-        <div className="flex items-center space-x-2">
+      {/* Message Input - Fixed at bottom */}
+      <div className="bg-[#B3E5FC] p-4">
+        <form onSubmit={handleSendMessage} className="flex items-center space-x-2">
+          <button
+            type="button"
+            className="px-4 py-2 bg-white text-gray-700 rounded-lg hover:bg-gray-50"
+          >
+            Attach Report
+          </button>
           <input
             type="text"
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
-            placeholder="Type a message..."
-            className="flex-1 border rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+            placeholder="Message"
+            className="flex-1 px-4 py-2 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
           />
           <button
             type="submit"
-            className="bg-primary text-white rounded-full p-2 hover:bg-primary/90"
+            className="p-2 bg-white text-blue-500 rounded-full hover:bg-gray-50"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -141,8 +149,8 @@ export default function DoctorChatPage({ params }: { params: { doctorId: string 
               />
             </svg>
           </button>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   )
 }
