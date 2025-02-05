@@ -30,7 +30,7 @@ export default function VerticalTimeline({
   return (
     <div className="relative min-h-screen p-6">
       {/* Central timeline */}
-      <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-blue-500 transform -translate-x-1/2" />
+      <div className="absolute left-1/2 top-0 bottom-0 w-1 bg-blue-500 transform -translate-x-1/2" />
 
       {/* Timeline content */}
       <div className="relative">
@@ -45,22 +45,30 @@ export default function VerticalTimeline({
               </div>
             )}
 
-            {/* Timeline dot and connector */}
+            {/* Timeline dot and horizontal connector */}
             <div className="absolute left-1/2 transform -translate-x-1/2">
-              <div className="w-3 h-3 bg-blue-500 rounded-full border-2 border-white shadow-sm" />
-              <div className={`absolute top-1/2 ${
-                entry.side === 'left' ? 'left-full' : 'right-full'
-              } w-[calc(50%-1.5rem)] h-0.5 bg-blue-200`} 
-              style={{
-                transform: 'translateY(-50%)'
-              }} />
+              {/* Center dot */}
+              <div className="w-4 h-4 bg-blue-500 rounded-full border-4 border-white shadow-sm relative z-10" />
+              
+              {/* Horizontal connector line */}
+              <div 
+                className={`absolute top-1/2 h-[2px] bg-blue-300 ${
+                  entry.side === 'left' 
+                    ? 'right-2 w-[calc(50vw-10rem)]' 
+                    : 'left-2 w-[calc(50vw-10rem)]'
+                }`}
+                style={{ transform: 'translateY(-50%)' }}
+              />
             </div>
 
-            <TimelineTile
-              {...entry}
-              onSave={(data) => onUpdateEntry?.(entry.id, data)}
-              onAddNote={(note) => onAddNote?.(entry.id, note)}
-            />
+            {/* Add margin to push the tile away from the center */}
+            <div className={`${entry.side === 'left' ? 'ml-[calc(50%+2rem)]' : 'mr-[calc(50%+2rem)]'}`}>
+              <TimelineTile
+                {...entry}
+                onSave={(data) => onUpdateEntry?.(entry.id, data)}
+                onAddNote={(note) => onAddNote?.(entry.id, note)}
+              />
+            </div>
           </div>
         ))}
 
