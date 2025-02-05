@@ -80,7 +80,7 @@ export default function TimelineTile({
     <>
       <div className={`flex ${side === 'left' ? 'justify-end pr-8' : 'justify-start pl-8'} items-center`}>
         <div className={`relative w-[400px] rounded-lg shadow-md ${
-          type === 'lab-result' ? 'bg-red-50' : 'bg-blue-50'
+          type === 'lab-result' ? 'bg-red-200' : 'bg-blue-200'
         }`}>
           {/* Tabs */}
           <div className="flex border-b">
@@ -88,7 +88,7 @@ export default function TimelineTile({
               className={`flex-1 px-4 py-2 text-sm font-medium ${
                 activeTab === 'details'
                   ? 'border-b-2 border-primary text-primary'
-                  : 'text-gray-500 hover:text-gray-700'
+                  : 'text-gray-700 hover:text-gray-900'
               }`}
               onClick={() => setActiveTab('details')}
             >
@@ -98,7 +98,7 @@ export default function TimelineTile({
               className={`flex-1 px-4 py-2 text-sm font-medium ${
                 activeTab === 'notes'
                   ? 'border-b-2 border-primary text-primary'
-                  : 'text-gray-500 hover:text-gray-700'
+                  : 'text-gray-700 hover:text-gray-900'
               }`}
               onClick={() => setActiveTab('notes')}
             >
@@ -117,15 +117,15 @@ export default function TimelineTile({
                   <div className="space-y-2">
                     <div className="bg-white rounded-lg p-3 space-y-2">
                       <p className="text-sm flex justify-between">
-                        <span className="text-gray-600">WBC:</span>
+                        <span className="text-gray-700">WBC:</span>
                         <span className="font-medium">{content?.wbc}</span>
                       </p>
                       <p className="text-sm flex justify-between">
-                        <span className="text-gray-600">LLRC:</span>
+                        <span className="text-gray-700">LLRC:</span>
                         <span className="font-medium">{content?.llrc}</span>
                       </p>
                       <p className="text-sm flex justify-between">
-                        <span className="text-gray-600">Unit Reading:</span>
+                        <span className="text-gray-700">Unit Reading:</span>
                         <span className="font-medium">{content?.unitReading}</span>
                       </p>
                     </div>
@@ -133,7 +133,7 @@ export default function TimelineTile({
                     {document && (
                       <div className="flex items-center justify-between mt-4">
                         <div className="flex items-center space-x-2">
-                          <DocumentIcon className="h-5 w-5 text-gray-500" />
+                          <DocumentIcon className="h-5 w-5 text-gray-600" />
                           <span className="text-sm">{document.name}</span>
                         </div>
                         <div className="flex space-x-2">
@@ -191,7 +191,7 @@ export default function TimelineTile({
                     <div
                       key={note.id}
                       className={`p-3 rounded ${
-                        note.type === 'restricted' ? 'bg-yellow-50' : 'bg-white'
+                        note.type === 'restricted' ? 'bg-yellow-100' : 'bg-white'
                       }`}
                     >
                       <div className="flex items-start justify-between mb-2">
@@ -203,18 +203,18 @@ export default function TimelineTile({
                           )}
                           <span className="text-sm font-medium">{note.author.name}</span>
                         </div>
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-gray-600">
                           {formatTimestamp(note.timestamp)}
                         </span>
                       </div>
-                      <p className="text-sm text-gray-600">{note.content}</p>
+                      <p className="text-sm text-gray-700">{note.content}</p>
                     </div>
                   ))}
                 </div>
               </div>
             )}
 
-            <div className="text-xs text-gray-500 mt-4">{date}</div>
+            <div className="text-xs text-gray-600 mt-4">{date}</div>
           </div>
         </div>
       </div>
