@@ -1,13 +1,41 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { Patient, TimelineEntry } from '@/types'
 import VerticalTimeline from '@/components/VerticalTimeline'
-import { TimelineEntry } from '@/types'
 
-const initialEntries = [
+// Mock patients data - in a real app, this would come from your backend
+const mockPatients: { [key: string]: Patient } = {
+  '876364': {
+    id: '876364',
+    patientName: 'Nithya Kumar',
+    patientNumber: '4782640981',
+    gender: 'Female',
+    lastVisit: '04/10/2023',
+    timeOfVisit: '02:00pm',
+    reason: 'Monthly checkup',
+    priority: 'high',
+    assignedDoctor: 'dr-james',
+    status: 'online'
+  },
+  '348745': {
+    id: '348745',
+    patientName: 'Varun P',
+    patientNumber: '4782640981',
+    gender: 'Male',
+    lastVisit: '04/10/2023',
+    timeOfVisit: '01:00 pm',
+    reason: 'Consultation',
+    priority: 'medium',
+    assignedDoctor: 'dr-james',
+    status: 'offline'
+  }
+}
+
+const initialEntries: TimelineEntry[] = [
   {
     id: '1',
-    date: '15/02/2024',
+    date: '2024-02-15T10:30:00Z',
     month: 'February',
     side: 'left' as const,
     type: 'lab-result' as const,
@@ -25,7 +53,7 @@ const initialEntries = [
   },
   {
     id: '2',
-    date: '15/02/2024',
+    date: '2024-02-15T09:00:00Z',
     month: '',
     side: 'right' as const,
     type: 'note' as const,
@@ -34,71 +62,35 @@ const initialEntries = [
       summary: 'Patient reports improvement in symptoms. Continue current medication regimen.'
     },
     notes: []
-  },
-  {
-    id: '3',
-    date: '10/02/2024',
-    month: '',
-    side: 'left' as const,
-    type: 'lab-result' as const,
-    title: 'Lipid Profile',
-    content: {
-      wbc: '145 mg/dL',
-      llrc: '85 mg/dL',
-      unitReading: '180/200'
-    },
-    document: {
-      name: 'lipid_profile.pdf',
-      url: '#'
-    },
-    notes: []
-  },
-  {
-    id: '4',
-    date: '05/02/2024',
-    month: '',
-    side: 'right' as const,
-    type: 'lab-result' as const,
-    title: 'Thyroid Function Test',
-    content: {
-      wbc: 'TSH: 2.5 mIU/L',
-      llrc: 'T4: 1.2 ng/dL',
-      unitReading: 'T3: 120 ng/dL'
-    },
-    document: {
-      name: 'thyroid_report.pdf',
-      url: '#'
-    },
-    notes: []
-  },
-  {
-    id: '5',
-    date: '01/02/2024',
-    month: '',
-    side: 'left' as const,
-    type: 'note' as const,
-    title: 'Initial Consultation',
-    content: {
-      summary: 'Patient presents with fatigue and weight changes. Ordering comprehensive blood work.'
-    },
-    notes: []
   }
 ]
 
-export default function TimelinePage() {
-  const [entries, setEntries] = useState(initialEntries)
+export default function TimelinePage({ params }: { params: { id: string } }) {
+  const [entries, setEntries] = useState<TimelineEntry[]>(initialEntries)
+  const [patient, setPatient] = useState<Patient | null>(null)
+
+  useEffect(() => {
+    // Get patient info based on the ID
+    const currentPatient = mockPatients[params.id]
+    if (currentPatient) {
+      setPatient(currentPatient)
+    }
+  }, [params.id])
 
   const handleAddEntry = (newEntry: Partial<TimelineEntry>) => {
-    setEntries(prev => [...prev, {
+    const entry = {
       ...newEntry,
       id: Date.now().toString(),
       notes: []
-    } as TimelineEntry])
+    } as TimelineEntry
+
+    // Add new entry at the beginning of the array
+    setEntries(prev => [entry, ...prev])
   }
 
   const handleUpdateEntry = (id: string, data: Partial<TimelineEntry>) => {
     setEntries(prev => prev.map(entry =>
-      entry.id === id ? { ...entry, ...data } : entry
+      entry.id === id ? { ...entry, content: { ...entry.content, ...data } } : entry
     ))
   }
 
@@ -121,22 +113,33 @@ export default function TimelinePage() {
     }))
   }
 
+  if (!patient) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-gray-50">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-gray-800 mb-2">Patient Not Found</h2>
+          <p className="text-gray-600">The patient you're looking for doesn't exist.</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto">
+        {/* Patient Info Header */}
         <div className="flex items-center justify-between p-4 bg-white border-b">
           <div className="flex items-center space-x-4">
             <img
-              src="https://ui-avatars.com/api/?name=John+Doe"
-              alt="Dr. John Doe"
+              src={`https://ui-avatars.com/api/?name=${encodeURIComponent(patient.patientName)}`}
+              alt={patient.patientName}
               className="w-12 h-12 rounded-full"
             />
             <div>
-              <h2 className="text-lg font-semibold">Dr. John Doe</h2>
-              <p className="text-sm text-gray-600">Surgeon</p>
+              <h2 className="text-lg font-semibold">{patient.patientName}</h2>
+              <p className="text-sm text-gray-600">Patient ID: {patient.id}</p>
             </div>
           </div>
-          <h1 className="text-xl font-semibold">My Timeline</h1>
           <div className="flex items-center space-x-4">
             <button className="p-2 hover:bg-gray-100 rounded-full">
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -145,7 +148,7 @@ export default function TimelinePage() {
             </button>
             <button className="p-2 hover:bg-gray-100 rounded-full">
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
               </svg>
             </button>
           </div>

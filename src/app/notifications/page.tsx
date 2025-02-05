@@ -2,14 +2,28 @@
 
 import { useState } from 'react'
 import { CheckIcon, XMarkIcon } from '@heroicons/react/24/outline'
-import { FriendRequest, TransferRequest } from '@/types'
+import { FriendRequest, TransferRequest, Doctor, Patient } from '@/types'
+
+// Toast notification component
+function Toast({ message, type, onClose }: { message: string; type: 'success' | 'error'; onClose: () => void }) {
+  return (
+    <div className={`fixed bottom-4 right-4 flex items-center space-x-2 px-4 py-2 rounded-lg shadow-lg ${
+      type === 'success' ? 'bg-green-500' : 'bg-red-500'
+    } text-white z-50 animate-fadeIn`}>
+      <p>{message}</p>
+      <button onClick={onClose} className="ml-2 hover:text-gray-200">
+        <XMarkIcon className="h-5 w-5" />
+      </button>
+    </div>
+  )
+}
 
 // Mock data for doctor friend requests
 const initialFriendRequests: FriendRequest[] = [
   {
     id: '1',
     from: {
-      id: '4',
+      id: 'dr-robert',
       name: 'Dr. Robert Smith',
       specialization: 'Orthopedic Surgeon',
       hospital: 'Central Medical Center',
@@ -21,7 +35,7 @@ const initialFriendRequests: FriendRequest[] = [
   {
     id: '2',
     from: {
-      id: '5',
+      id: 'dr-lisa',
       name: 'Dr. Lisa Anderson',
       specialization: 'Dermatologist',
       hospital: 'Skin Care Clinic',
@@ -72,34 +86,101 @@ export default function NotificationsPage() {
   const [activeTab, setActiveTab] = useState<'doctors' | 'transfers'>('doctors')
   const [friendRequests, setFriendRequests] = useState<FriendRequest[]>(initialFriendRequests)
   const [transferRequests, setTransferRequests] = useState<TransferRequest[]>(initialTransferRequests)
+  const [doctors, setDoctors] = useState<Doctor[]>([])
+  const [patients, setPatients] = useState<Patient[]>([])
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
 
   const pendingFriendRequests = friendRequests.filter(req => req.status === 'pending').length
   const pendingTransferRequests = transferRequests.filter(req => req.status === 'pending').length
 
   const handleAcceptFriendRequest = (request: FriendRequest) => {
+    // Update request status
     setFriendRequests(requests =>
       requests.map(r => r.id === request.id ? { ...r, status: 'accepted' } : r)
     )
-    alert(`Friend request from ${request.from.name} accepted`)
+
+    // Add doctor to the network
+    const newDoctor: Doctor = {
+      id: request.from.id,
+      name: request.from.name,
+      specialization: request.from.specialization,
+      experience: '',
+      education: [],
+      certifications: [],
+      contact: {
+        email: '',
+        phone: '',
+        address: request.from.hospital
+      },
+      availability: {
+        days: [],
+        hours: ''
+      },
+      rating: 0,
+      totalPatients: 0
+    }
+
+    setDoctors(prev => [...prev, newDoctor])
+    
+    // Show success notification
+    setToast({
+      message: `Dr. ${request.from.name} has been added to your network`,
+      type: 'success'
+    })
   }
 
   const handleDeclineFriendRequest = (requestId: string) => {
     setFriendRequests(requests =>
       requests.map(r => r.id === requestId ? { ...r, status: 'rejected' } : r)
     )
+
+    // Show error notification
+    setToast({
+      message: 'Friend request declined',
+      type: 'error'
+    })
   }
 
   const handleAcceptTransfer = (request: TransferRequest) => {
+    // Update request status
     setTransferRequests(requests =>
       requests.map(r => r.id === request.id ? { ...r, status: 'accepted' } : r)
     )
-    alert(`Transfer request for patient ${request.patientName} accepted`)
+
+    // Add patient to your list
+    const newPatient: Patient = {
+      id: request.patientId,
+      patientName: request.patientName,
+      patientNumber: '', // This would come from the actual patient data
+      gender: 'Male', // This would come from the actual patient data
+      lastVisit: new Date().toLocaleDateString(),
+      timeOfVisit: new Date().toLocaleTimeString(),
+      reason: request.reason,
+      priority: request.urgency,
+      assignedDoctor: 'dr-james', // Current doctor's ID
+      chatEnabled: true,
+      unreadMessages: 0
+    }
+
+    setPatients(prev => [...prev, newPatient])
+    
+    // Show success notification
+    setToast({
+      message: `Patient ${request.patientName} has been added to your patient list`,
+      type: 'success'
+    })
   }
 
   const handleDeclineTransfer = (requestId: string) => {
     setTransferRequests(requests =>
       requests.map(r => r.id === requestId ? { ...r, status: 'rejected' } : r)
     )
+
+    // Show error notification
+    setToast({
+      message: 'Transfer request declined',
+      type: 'error'
+    })
   }
 
   const formatDate = (timestamp: string) => {
@@ -283,6 +364,15 @@ export default function NotificationsPage() {
             )}
           </div>
         </div>
+      )}
+
+      {/* Toast Notification */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
       )}
     </div>
   )

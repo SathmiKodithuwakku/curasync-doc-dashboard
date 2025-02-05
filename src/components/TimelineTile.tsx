@@ -1,7 +1,15 @@
 'use client'
 
 import { useState } from 'react'
-import { DocumentIcon, EyeIcon, LockClosedIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import { DocumentIcon, EyeIcon, LockClosedIcon, XMarkIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline'
+
+interface Medicine {
+  id: string
+  name: string
+  dosage: string
+  frequency: string
+  duration: string
+}
 
 interface Note {
   id: string
@@ -19,9 +27,11 @@ interface TimelineTileProps {
   id: string
   date: string
   side: 'left' | 'right'
-  type: 'note' | 'lab-result'
+  type: 'note' | 'lab-result' | 'prescription'
   title?: string
   content?: {
+    medicines?: Medicine[]
+    specialInstructions?: string
     wbc?: string
     llrc?: string
     unitReading?: string
@@ -40,16 +50,58 @@ export default function TimelineTile({
   date,
   side,
   type,
-  title,
+  title = 'Prescription',
   content,
   document,
   notes = [],
-  onAddNote
+  onAddNote,
+  onSave
 }: TimelineTileProps) {
   const [newNote, setNewNote] = useState('')
   const [noteType, setNoteType] = useState<'general' | 'restricted'>('general')
   const [activeTab, setActiveTab] = useState<'details' | 'notes'>('details')
   const [showPdfModal, setShowPdfModal] = useState(false)
+  const [medicines, setMedicines] = useState<Medicine[]>(content?.medicines || [])
+  const [specialInstructions, setSpecialInstructions] = useState(content?.specialInstructions || '')
+  const [newMedicine, setNewMedicine] = useState<Omit<Medicine, 'id'>>({
+    name: '',
+    dosage: '',
+    frequency: '',
+    duration: ''
+  })
+
+  const handleAddMedicine = () => {
+    if (!newMedicine.name || !newMedicine.dosage || !newMedicine.frequency || !newMedicine.duration) {
+      return
+    }
+
+    const medicine: Medicine = {
+      id: Date.now().toString(),
+      ...newMedicine
+    }
+
+    setMedicines([...medicines, medicine])
+    setNewMedicine({
+      name: '',
+      dosage: '',
+      frequency: '',
+      duration: ''
+    })
+
+    onSave?.({
+      medicines: [...medicines, medicine],
+      specialInstructions
+    })
+  }
+
+  const handleRemoveMedicine = (id: string) => {
+    const updatedMedicines = medicines.filter(m => m.id !== id)
+    setMedicines(updatedMedicines)
+    onSave?.({
+      medicines: updatedMedicines,
+      specialInstructions
+    })
+  }
 
   const handleAddNote = () => {
     if (!newNote.trim()) return
@@ -79,8 +131,8 @@ export default function TimelineTile({
   return (
     <>
       <div className={`flex ${side === 'left' ? 'justify-end pr-8' : 'justify-start pl-8'} items-center`}>
-        <div className={`relative w-[400px] rounded-lg shadow-md ${
-          type === 'lab-result' ? 'bg-red-200' : 'bg-blue-200'
+        <div className={`relative w-[600px] rounded-lg shadow-md ${
+          type === 'lab-result' ? 'bg-red-200' : type === 'prescription' ? 'bg-green-200' : 'bg-blue-200'
         }`}>
           {/* Tabs */}
           <div className="flex border-b">
@@ -112,6 +164,107 @@ export default function TimelineTile({
                 <div className="flex justify-between items-start mb-4">
                   <h3 className="font-semibold text-lg">{title}</h3>
                 </div>
+
+                {type === 'prescription' && (
+                  <div className="space-y-4">
+                    {/* Medicines Table */}
+                    <div className="bg-white rounded-lg p-4">
+                      <table className="w-full">
+                        <thead>
+                          <tr className="border-b">
+                            <th className="text-left py-2">Medicine</th>
+                            <th className="text-left py-2">Dosage</th>
+                            <th className="text-left py-2">Frequency</th>
+                            <th className="text-left py-2">Duration</th>
+                            <th className="text-left py-2"></th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {medicines.map((medicine) => (
+                            <tr key={medicine.id} className="border-b">
+                              <td className="py-2">{medicine.name}</td>
+                              <td className="py-2">{medicine.dosage}</td>
+                              <td className="py-2">{medicine.frequency}</td>
+                              <td className="py-2">{medicine.duration}</td>
+                              <td className="py-2">
+                                <button
+                                  onClick={() => handleRemoveMedicine(medicine.id)}
+                                  className="text-red-500 hover:text-red-700"
+                                >
+                                  <TrashIcon className="h-4 w-4" />
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                          <tr>
+                            <td className="py-2">
+                              <input
+                                type="text"
+                                value={newMedicine.name}
+                                onChange={(e) => setNewMedicine({ ...newMedicine, name: e.target.value })}
+                                placeholder="Medicine name"
+                                className="w-full px-2 py-1 border rounded"
+                              />
+                            </td>
+                            <td className="py-2">
+                              <input
+                                type="text"
+                                value={newMedicine.dosage}
+                                onChange={(e) => setNewMedicine({ ...newMedicine, dosage: e.target.value })}
+                                placeholder="Dosage"
+                                className="w-full px-2 py-1 border rounded"
+                              />
+                            </td>
+                            <td className="py-2">
+                              <input
+                                type="text"
+                                value={newMedicine.frequency}
+                                onChange={(e) => setNewMedicine({ ...newMedicine, frequency: e.target.value })}
+                                placeholder="Frequency"
+                                className="w-full px-2 py-1 border rounded"
+                              />
+                            </td>
+                            <td className="py-2">
+                              <input
+                                type="text"
+                                value={newMedicine.duration}
+                                onChange={(e) => setNewMedicine({ ...newMedicine, duration: e.target.value })}
+                                placeholder="Duration"
+                                className="w-full px-2 py-1 border rounded"
+                              />
+                            </td>
+                            <td className="py-2">
+                              <button
+                                onClick={handleAddMedicine}
+                                className="text-primary hover:text-primary/80"
+                              >
+                                <PlusIcon className="h-4 w-4" />
+                              </button>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* Special Instructions */}
+                    <div className="bg-white rounded-lg p-4">
+                      <h4 className="font-medium mb-2">Special Instructions:</h4>
+                      <textarea
+                        value={specialInstructions}
+                        onChange={(e) => {
+                          setSpecialInstructions(e.target.value)
+                          onSave?.({
+                            medicines,
+                            specialInstructions: e.target.value
+                          })
+                        }}
+                        rows={3}
+                        className="w-full px-3 py-2 border rounded resize-none focus:outline-none focus:ring-1 focus:ring-primary"
+                        placeholder="Enter any special instructions..."
+                      />
+                    </div>
+                  </div>
+                )}
 
                 {type === 'lab-result' && (
                   <div className="space-y-2">

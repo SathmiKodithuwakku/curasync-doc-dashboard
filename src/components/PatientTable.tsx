@@ -19,7 +19,8 @@ const patients: Patient[] = [
     reason: 'Monthly checkup',
     priority: 'high',
     assignedDoctor: 'dr-james',
-    chatEnabled: true
+    chatEnabled: true,
+    unreadMessages: 1
   },
   {
     id: '348745',
@@ -31,7 +32,8 @@ const patients: Patient[] = [
     reason: 'Consultation',
     priority: 'medium',
     assignedDoctor: 'dr-james',
-    chatEnabled: false
+    chatEnabled: false,
+    unreadMessages: 0
   }
 ]
 
@@ -49,11 +51,19 @@ export default function PatientTable() {
 
   const handleChatClick = (patientId: string) => {
     const patient = patientsList.find(p => p.id === patientId)
-    if (patient?.chatEnabled) {
-      router.push(`/chat/${patientId}`)
-    } else {
+    if (!patient?.chatEnabled) {
       alert('Chat is disabled for this patient')
+      return
     }
+
+    // Clear unread messages count when opening chat
+    setPatientsList(prev => prev.map(p => 
+      p.id === patientId 
+        ? { ...p, unreadMessages: 0 }
+        : p
+    ))
+
+    router.push(`/chat/${patientId}`)
   }
 
   const handleTimelineClick = (patientId: string) => {
@@ -80,12 +90,10 @@ export default function PatientTable() {
   const handleToggleChat = (patient: Patient) => {
     const newStatus = !patient.chatEnabled
     
-    // Show confirmation dialog
     if (!confirm(`Are you sure you want to ${newStatus ? 'enable' : 'disable'} chat for ${patient.patientName}?`)) {
       return
     }
 
-    // Update patient chat status
     setPatientsList(patients =>
       patients.map(p =>
         p.id === patient.id
@@ -94,7 +102,6 @@ export default function PatientTable() {
       )
     )
 
-    // Log the change
     const log: ChatPermissionLog = {
       id: Date.now().toString(),
       patientId: patient.id,
@@ -108,7 +115,6 @@ export default function PatientTable() {
     }
     setChatLogs(prev => [log, ...prev])
 
-    // Show success message
     alert(`Chat ${newStatus ? 'enabled' : 'disabled'} for ${patient.patientName}`)
   }
 
@@ -260,7 +266,7 @@ export default function PatientTable() {
                 <td className="p-4">
                   <div className="flex items-center space-x-2">
                     <button 
-                      className={`text-gray-600 transition-colors ${
+                      className={`text-gray-600 transition-colors relative ${
                         patient.chatEnabled ? 'hover:text-primary' : 'opacity-50 cursor-not-allowed'
                       }`}
                       onClick={() => handleChatClick(patient.id)}
@@ -268,6 +274,11 @@ export default function PatientTable() {
                       disabled={!patient.chatEnabled}
                     >
                       <ChatBubbleLeftIcon className="h-6 w-6" />
+                      {patient.unreadMessages > 0 && (
+                        <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                          {patient.unreadMessages}
+                        </span>
+                      )}
                     </button>
                     <button 
                       className="text-gray-600 hover:text-primary transition-colors"

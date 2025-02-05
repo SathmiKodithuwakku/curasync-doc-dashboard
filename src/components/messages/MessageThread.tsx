@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import { Conversation, Message } from '@/types'
+import { useEffect, useRef } from 'react'
+import { Conversation, Doctor } from '@/types'
 import { 
   EllipsisHorizontalIcon,
   InformationCircleIcon
@@ -9,70 +9,31 @@ import {
 
 interface MessageThreadProps {
   conversation: Conversation
+  currentDoctor: Doctor
 }
 
-// Mock messages data
-const mockMessages: Message[] = [
-  {
-    id: '1',
-    content: 'Hello Dr. Smith, I have a question about my prescription.',
-    sender: {
-      id: 'p1',
-      name: 'John Doe',
-      role: 'patient',
-      avatar: 'https://ui-avatars.com/api/?name=John+Doe'
-    },
-    receiver: {
-      id: 'd1',
-      name: 'Dr. Sarah Smith',
-      role: 'doctor',
-      avatar: 'https://ui-avatars.com/api/?name=Sarah+Smith'
-    },
-    timestamp: new Date(Date.now() - 3600000).toISOString(),
-    status: 'read',
-    type: 'text'
-  },
-  {
-    id: '2',
-    content: 'Of course, what would you like to know?',
-    sender: {
-      id: 'd1',
-      name: 'Dr. Sarah Smith',
-      role: 'doctor',
-      avatar: 'https://ui-avatars.com/api/?name=Sarah+Smith'
-    },
-    receiver: {
-      id: 'p1',
-      name: 'John Doe',
-      role: 'patient',
-      avatar: 'https://ui-avatars.com/api/?name=John+Doe'
-    },
-    timestamp: new Date(Date.now() - 3500000).toISOString(),
-    status: 'read',
-    type: 'text'
-  }
-]
-
-export default function MessageThread({ conversation }: MessageThreadProps) {
-  const [messages, setMessages] = useState<Message[]>(mockMessages)
+export default function MessageThread({ conversation, currentDoctor }: MessageThreadProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+  }, [conversation.messages])
 
   const formatMessageTime = (timestamp: string) => {
     return new Date(timestamp).toLocaleTimeString([], { 
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
+      hour12: true,
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
     })
   }
 
-  const isConsecutiveMessage = (message: Message, index: number) => {
+  const isConsecutiveMessage = (index: number) => {
     if (index === 0) return false
-    const prevMessage = messages[index - 1]
-    return prevMessage.sender.id === message.sender.id &&
-           new Date(message.timestamp).getTime() - new Date(prevMessage.timestamp).getTime() < 300000
+    const prevMessage = conversation.messages[index - 1]
+    const currentMessage = conversation.messages[index]
+    return prevMessage.sender.id === currentMessage.sender.id &&
+           new Date(currentMessage.timestamp).getTime() - new Date(prevMessage.timestamp).getTime() < 300000
   }
 
   return (
@@ -114,24 +75,24 @@ export default function MessageThread({ conversation }: MessageThreadProps) {
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-6 space-y-4">
-        {messages.map((message, index) => (
+        {conversation.messages?.map((message, index) => (
           <div
             key={message.id}
-            className={`flex ${message.sender.role === 'doctor' ? 'justify-end' : 'justify-start'}`}
+            className={`flex ${message.sender.id === currentDoctor.id ? 'justify-end' : 'justify-start'}`}
           >
-            {!isConsecutiveMessage(message, index) && message.sender.role !== 'doctor' && (
+            {!isConsecutiveMessage(index) && message.sender.id !== currentDoctor.id && (
               <img
                 src={message.sender.avatar}
                 alt={message.sender.name}
                 className="w-8 h-8 rounded-full mr-2"
               />
             )}
-            <div className={`max-w-[70%] ${isConsecutiveMessage(message, index) ? 'ml-10' : ''}`}>
-              {!isConsecutiveMessage(message, index) && (
+            <div className={`max-w-[70%] ${isConsecutiveMessage(index) ? 'ml-10' : ''}`}>
+              {!isConsecutiveMessage(index) && (
                 <p className="text-xs text-gray-500 mb-1">{message.sender.name}</p>
               )}
               <div className={`rounded-lg px-4 py-2 ${
-                message.sender.role === 'doctor'
+                message.sender.id === currentDoctor.id
                   ? 'bg-primary text-white'
                   : 'bg-gray-100'
               }`}>
@@ -151,7 +112,7 @@ export default function MessageThread({ conversation }: MessageThreadProps) {
                         className="flex items-center space-x-2 text-sm text-blue-500 hover:text-blue-600"
                       >
                         <span>{attachment.name}</span>
-                        <span className="text-xs">({Math.round(attachment.size! / 1024)} KB)</span>
+                        <span className="text-xs">({Math.round(attachment.size / 1024)} KB)</span>
                       </a>
                     )}
                   </div>

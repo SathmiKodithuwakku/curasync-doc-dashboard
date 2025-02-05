@@ -1,5 +1,25 @@
 // Add these new types to the existing types file
 
+export interface Patient {
+  id: string;
+  patientName: string;
+  patientNumber: string;
+  gender: 'Male' | 'Female';
+  lastVisit: string;
+  timeOfVisit: string;
+  reason: string;
+  priority: 'high' | 'medium' | 'low';
+  assignedDoctor: string;
+  status?: 'online' | 'offline';
+  chatEnabled?: boolean;
+  unreadMessages?: number;
+  medicalHistory?: {
+    condition: string;
+    date: string;
+    treatment: string;
+  }[];
+}
+
 export interface Message {
   id: string;
   content: string;

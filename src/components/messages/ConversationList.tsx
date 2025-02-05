@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Conversation } from '@/types'
+import { useState } from 'react'
+import { Conversation, Doctor } from '@/types'
 import { CheckCircleIcon, ClockIcon } from '@heroicons/react/24/outline'
 
 interface ConversationListProps {
@@ -9,57 +9,18 @@ interface ConversationListProps {
   showArchived: boolean
   onSelectConversation: (conversation: Conversation) => void
   activeConversationId?: string
+  conversations: Conversation[]
+  currentDoctor: Doctor
 }
-
-// Mock conversations data
-const mockConversations: Conversation[] = [
-  {
-    id: '1',
-    participants: [
-      {
-        id: 'p1',
-        name: 'John Doe',
-        role: 'patient',
-        avatar: 'https://ui-avatars.com/api/?name=John+Doe',
-        status: 'online'
-      }
-    ],
-    unreadCount: 2,
-    category: 'patient',
-    pinned: true,
-    archived: false,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  },
-  {
-    id: '2',
-    participants: [
-      {
-        id: 'd1',
-        name: 'Dr. Sarah Smith',
-        role: 'doctor',
-        avatar: 'https://ui-avatars.com/api/?name=Sarah+Smith',
-        status: 'offline',
-        lastSeen: new Date(Date.now() - 3600000).toISOString()
-      }
-    ],
-    unreadCount: 0,
-    category: 'doctor',
-    pinned: false,
-    archived: false,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  }
-]
 
 export default function ConversationList({
   filter,
   showArchived,
   onSelectConversation,
-  activeConversationId
+  activeConversationId,
+  conversations,
+  currentDoctor
 }: ConversationListProps) {
-  const [conversations, setConversations] = useState<Conversation[]>(mockConversations)
-
   const filteredConversations = conversations.filter(conv => {
     if (showArchived !== conv.archived) return false
     if (filter === 'patients' && conv.category !== 'patient') return false
@@ -112,19 +73,19 @@ export default function ConversationList({
                 )}
               </div>
               <p className="text-sm text-gray-500 truncate">
-                {conversation.lastMessage?.content || 'No messages yet'}
+                {conversation.messages?.[conversation.messages.length - 1]?.content || 'No messages yet'}
               </p>
               <div className="flex items-center space-x-2 mt-1">
                 <span className="text-xs text-gray-400">
                   {conversation.participants[0].status === 'online' 
                     ? 'Online'
-                    : formatLastSeen(conversation.participants[0].lastSeen)
+                    : formatLastSeen(conversation.updatedAt)
                   }
                 </span>
-                {conversation.lastMessage?.status === 'read' && (
+                {conversation.messages?.[conversation.messages.length - 1]?.status === 'read' && (
                   <CheckCircleIcon className="h-4 w-4 text-primary" />
                 )}
-                {conversation.lastMessage?.status === 'sent' && (
+                {conversation.messages?.[conversation.messages.length - 1]?.status === 'sent' && (
                   <ClockIcon className="h-4 w-4 text-gray-400" />
                 )}
               </div>

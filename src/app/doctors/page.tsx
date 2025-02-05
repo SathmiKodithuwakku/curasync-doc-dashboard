@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { ChatBubbleLeftIcon, UserPlusIcon } from '@heroicons/react/24/outline'
 import { useRouter } from 'next/navigation'
+import { ChatBubbleLeftIcon, UserPlusIcon } from '@heroicons/react/24/outline'
 import SearchDoctorModal from '@/components/SearchDoctorModal'
 
 interface Doctor {
@@ -16,10 +16,10 @@ interface Doctor {
   isFriend?: boolean
 }
 
-// Initial doctors list
+// Initial doctors list - using the same IDs as in the chat component
 const initialDoctors: Doctor[] = [
   {
-    id: '1',
+    id: 'dr-sarah',
     name: 'Dr. Sarah Johnson',
     specialization: 'Cardiologist',
     experience: '12 years',
@@ -28,7 +28,7 @@ const initialDoctors: Doctor[] = [
     image: 'https://ui-avatars.com/api/?name=Sarah+Johnson'
   },
   {
-    id: '2',
+    id: 'dr-michael',
     name: 'Dr. Michael Chen',
     specialization: 'Neurologist',
     experience: '15 years',
@@ -36,15 +36,6 @@ const initialDoctors: Doctor[] = [
     status: 'offline',
     image: 'https://ui-avatars.com/api/?name=Michael+Chen',
     isFriend: true
-  },
-  {
-    id: '3',
-    name: 'Dr. Emily Williams',
-    specialization: 'Pediatrician',
-    experience: '8 years',
-    patients: 900,
-    status: 'online',
-    image: 'https://ui-avatars.com/api/?name=Emily+Williams'
   }
 ]
 
@@ -125,16 +116,16 @@ export default function DoctorsPage() {
                 View Profile
               </button>
               <div className="flex items-center space-x-2">
-                <button
+                <button 
                   onClick={() => handleChat(doctor.id)}
-                  className="text-gray-600 hover:text-primary"
+                  className="text-gray-600 hover:text-primary transition-colors"
                 >
                   <ChatBubbleLeftIcon className="h-6 w-6" />
                 </button>
                 {!doctor.isFriend && (
-                  <button
+                  <button 
                     onClick={() => handleSendFriendRequest(doctor.id)}
-                    className="text-gray-600 hover:text-primary"
+                    className="text-gray-600 hover:text-primary transition-colors"
                     title="Send friend request"
                   >
                     <UserPlusIcon className="h-6 w-6" />
