@@ -7,44 +7,80 @@ import { TimelineEntry } from '@/types'
 const initialEntries = [
   {
     id: '1',
-    date: '11/10/2024',
-    month: 'October',
+    date: '15/02/2024',
+    month: 'February',
     side: 'left' as const,
-    type: 'note' as const,
-    notes: []
-  },
-  {
-    id: '2',
-    date: '11/10/2024',
-    month: '',
-    side: 'right' as const,
     type: 'lab-result' as const,
-    title: 'Full Blood Count',
+    title: 'Complete Blood Count',
     content: {
       wbc: '10.32 ppm',
       llrc: '56.33 mm/gl',
       unitReading: '22/56'
     },
     document: {
-      name: 'report21.pdf',
+      name: 'cbc_report.pdf',
       url: '#'
     },
     notes: []
   },
   {
-    id: '3',
-    date: '11/10/2024',
-    month: 'November',
-    side: 'left' as const,
+    id: '2',
+    date: '15/02/2024',
+    month: '',
+    side: 'right' as const,
     type: 'note' as const,
+    title: 'Follow-up Consultation',
+    content: {
+      summary: 'Patient reports improvement in symptoms. Continue current medication regimen.'
+    },
+    notes: []
+  },
+  {
+    id: '3',
+    date: '10/02/2024',
+    month: '',
+    side: 'left' as const,
+    type: 'lab-result' as const,
+    title: 'Lipid Profile',
+    content: {
+      wbc: '145 mg/dL',
+      llrc: '85 mg/dL',
+      unitReading: '180/200'
+    },
+    document: {
+      name: 'lipid_profile.pdf',
+      url: '#'
+    },
     notes: []
   },
   {
     id: '4',
-    date: '11/10/2024',
+    date: '05/02/2024',
     month: '',
     side: 'right' as const,
     type: 'lab-result' as const,
+    title: 'Thyroid Function Test',
+    content: {
+      wbc: 'TSH: 2.5 mIU/L',
+      llrc: 'T4: 1.2 ng/dL',
+      unitReading: 'T3: 120 ng/dL'
+    },
+    document: {
+      name: 'thyroid_report.pdf',
+      url: '#'
+    },
+    notes: []
+  },
+  {
+    id: '5',
+    date: '01/02/2024',
+    month: '',
+    side: 'left' as const,
+    type: 'note' as const,
+    title: 'Initial Consultation',
+    content: {
+      summary: 'Patient presents with fatigue and weight changes. Ordering comprehensive blood work.'
+    },
     notes: []
   }
 ]

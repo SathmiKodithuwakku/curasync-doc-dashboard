@@ -35,7 +35,7 @@ export default function VerticalTimeline({
       {/* Timeline content */}
       <div className="relative">
         {entries.map((entry, index) => (
-          <div key={entry.id} className="mb-8">
+          <div key={entry.id} className="mb-12">
             {/* Month marker */}
             {entry.month && (
               <div className="absolute left-1/2 transform -translate-x-1/2 z-10">
@@ -45,8 +45,16 @@ export default function VerticalTimeline({
               </div>
             )}
 
-            {/* Timeline dot */}
-            <div className="absolute left-1/2 transform -translate-x-1/2 w-3 h-3 bg-blue-500 rounded-full border-2 border-white" />
+            {/* Timeline dot and connector */}
+            <div className="absolute left-1/2 transform -translate-x-1/2">
+              <div className="w-3 h-3 bg-blue-500 rounded-full border-2 border-white shadow-sm" />
+              <div className={`absolute top-1/2 ${
+                entry.side === 'left' ? 'left-full' : 'right-full'
+              } w-[calc(50%-1.5rem)] h-0.5 bg-blue-200`} 
+              style={{
+                transform: 'translateY(-50%)'
+              }} />
+            </div>
 
             <TimelineTile
               {...entry}

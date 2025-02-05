@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { DocumentIcon, PencilIcon, EyeIcon, LockClosedIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import { DocumentIcon, EyeIcon, LockClosedIcon, XMarkIcon } from '@heroicons/react/24/outline'
 
 interface Note {
   id: string
@@ -44,20 +44,12 @@ export default function TimelineTile({
   content,
   document,
   notes = [],
-  onSave,
   onAddNote
 }: TimelineTileProps) {
-  const [isEditing, setIsEditing] = useState(false)
-  const [editedContent, setEditedContent] = useState(content)
   const [newNote, setNewNote] = useState('')
   const [noteType, setNoteType] = useState<'general' | 'restricted'>('general')
   const [activeTab, setActiveTab] = useState<'details' | 'notes'>('details')
   const [showPdfModal, setShowPdfModal] = useState(false)
-
-  const handleSave = () => {
-    onSave?.({ ...editedContent })
-    setIsEditing(false)
-  }
 
   const handleAddNote = () => {
     if (!newNote.trim()) return
@@ -88,13 +80,8 @@ export default function TimelineTile({
     <>
       <div className={`flex ${side === 'left' ? 'justify-end pr-8' : 'justify-start pl-8'} items-center`}>
         <div className={`relative w-[400px] rounded-lg shadow-md ${
-          type === 'lab-result' ? 'bg-red-100' : 'bg-blue-100'
+          type === 'lab-result' ? 'bg-red-50' : 'bg-blue-50'
         }`}>
-          {/* Connector line */}
-          <div className={`absolute top-1/2 ${
-            side === 'left' ? 'right-0 translate-x-full' : 'left-0 -translate-x-full'
-          } w-8 h-0.5 bg-gray-300`} />
-
           {/* Tabs */}
           <div className="flex border-b">
             <button
@@ -124,74 +111,24 @@ export default function TimelineTile({
               <>
                 <div className="flex justify-between items-start mb-4">
                   <h3 className="font-semibold text-lg">{title}</h3>
-                  {type === 'lab-result' && (
-                    <button
-                      onClick={() => setIsEditing(!isEditing)}
-                      className="p-1 hover:bg-white/50 rounded"
-                    >
-                      <PencilIcon className="h-4 w-4 text-gray-600" />
-                    </button>
-                  )}
                 </div>
 
                 {type === 'lab-result' && (
                   <div className="space-y-2">
-                    {isEditing ? (
-                      <>
-                        <div className="space-y-2">
-                          <input
-                            type="text"
-                            value={editedContent?.wbc || ''}
-                            onChange={(e) => setEditedContent({
-                              ...editedContent,
-                              wbc: e.target.value
-                            })}
-                            className="w-full px-2 py-1 rounded border"
-                            placeholder="WBC"
-                          />
-                          <input
-                            type="text"
-                            value={editedContent?.llrc || ''}
-                            onChange={(e) => setEditedContent({
-                              ...editedContent,
-                              llrc: e.target.value
-                            })}
-                            className="w-full px-2 py-1 rounded border"
-                            placeholder="LLRC"
-                          />
-                          <input
-                            type="text"
-                            value={editedContent?.unitReading || ''}
-                            onChange={(e) => setEditedContent({
-                              ...editedContent,
-                              unitReading: e.target.value
-                            })}
-                            className="w-full px-2 py-1 rounded border"
-                            placeholder="Unit Reading"
-                          />
-                        </div>
-                        <div className="flex justify-end space-x-2 mt-4">
-                          <button
-                            onClick={() => setIsEditing(false)}
-                            className="px-3 py-1 text-sm text-gray-600 hover:bg-gray-100 rounded"
-                          >
-                            Cancel
-                          </button>
-                          <button
-                            onClick={handleSave}
-                            className="px-3 py-1 text-sm bg-primary text-white rounded hover:bg-primary/90"
-                          >
-                            Save
-                          </button>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <p className="text-sm">WBC - {content?.wbc}</p>
-                        <p className="text-sm">LLRC - {content?.llrc}</p>
-                        <p className="text-sm">Unit Reading - {content?.unitReading}</p>
-                      </>
-                    )}
+                    <div className="bg-white rounded-lg p-3 space-y-2">
+                      <p className="text-sm flex justify-between">
+                        <span className="text-gray-600">WBC:</span>
+                        <span className="font-medium">{content?.wbc}</span>
+                      </p>
+                      <p className="text-sm flex justify-between">
+                        <span className="text-gray-600">LLRC:</span>
+                        <span className="font-medium">{content?.llrc}</span>
+                      </p>
+                      <p className="text-sm flex justify-between">
+                        <span className="text-gray-600">Unit Reading:</span>
+                        <span className="font-medium">{content?.unitReading}</span>
+                      </p>
+                    </div>
 
                     {document && (
                       <div className="flex items-center justify-between mt-4">
